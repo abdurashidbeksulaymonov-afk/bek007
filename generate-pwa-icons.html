@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Parda PWA Icon Generator</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #f4f7fb;
+        font-family: Arial, sans-serif;
+      }
+      .wrap {
+        width: min(720px, calc(100vw - 32px));
+        background: #fff;
+        border-radius: 22px;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+        padding: 28px;
+      }
+      h1 {
+        margin-bottom: 12px;
+        font-size: 1.5rem;
+      }
+      p {
+        color: #475569;
+        line-height: 1.6;
+      }
+      .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 20px;
+      }
+      button {
+        border: none;
+        border-radius: 12px;
+        padding: 12px 18px;
+        font-weight: 700;
+        cursor: pointer;
+        background: linear-gradient(135deg, #0b1f4d, #183d7a);
+        color: #fff;
+      }
+      canvas {
+        display: none;
+      }
+      pre {
+        margin-top: 22px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px;
+        overflow: auto;
+        color: #0f172a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Parda PWA icon generator</h1>
+      <p>
+        Bu sahifa mavjud SVG logotipni canvas orqali PNG formatiga o‘tkazib,
+        <strong>pwa-192x192.png</strong> va <strong>pwa-512x512.png</strong>
+        fayllarini yuklab olish uchun mo‘ljallangan.
+      </p>
+
+      <div class="buttons">
+        <button id="download192">192×192 PNG yuklab olish</button>
+        <button id="download512">512×512 PNG yuklab olish</button>
+      </div>
+
+      <pre id="status">Tayyor.</pre>
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <script>
+      const svgMarkup = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+          <defs>
+            <linearGradient id="bg" x1="64" y1="40" x2="448" y2="468" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#0B1F4D"/>
+              <stop offset="1" stop-color="#183D7A"/>
+            </linearGradient>
+            <linearGradient id="gold" x1="170" y1="116" x2="342" y2="376" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#F8D887"/>
+              <stop offset="0.48" stop-color="#E4AF46"/>
+              <stop offset="1" stop-color="#C98824"/>
+            </linearGradient>
+            <linearGradient id="panel" x1="128" y1="146" x2="384" y2="390" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#D8E6FF" stop-opacity="0.65"/>
+              <stop offset="1" stop-color="#A9C1F3" stop-opacity="0.18"/>
+            </linearGradient>
+            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#061733" flood-opacity="0.35"/>
+            </filter>
+          </defs>
+
+          <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+
+          <g filter="url(#shadow)">
+            <path d="M104 138C142 150 180 157 218 161V362C180 365 142 373 104 390V138Z" fill="#1C3C72"/>
+            <path d="M218 161C253 167 286 176 320 191V337C286 352 253 360 218 365V161Z" fill="#254E8F"/>
+            <path d="M320 191C353 207 382 227 408 250V340C382 360 353 380 320 396V191Z" fill="#1C3C72"/>
+          </g>
+
+          <g opacity="0.96">
+            <path d="M110 146C143 160 170 178 189 202C205 222 214 249 214 280C214 309 205 336 188 355C170 378 144 395 110 410V146Z" fill="url(#gold)"/>
+            <path d="M214 161C239 168 263 181 282 200C299 217 308 240 308 269C308 298 299 321 282 339C264 358 240 371 214 378V161Z" fill="#E4B455"/>
+            <path d="M308 196C333 212 353 232 370 258C386 284 394 311 394 338C394 366 385 390 369 412C353 393 334 375 308 360V196Z" fill="#F4CA71"/>
+          </g>
+
+          <g>
+            <path d="M151 245C180 229 210 222 242 223C224 244 214 266 212 293C210 321 218 350 237 374C214 371 191 361 170 344C148 326 135 301 137 271C138 263 143 252 151 245Z" fill="url(#panel)"/>
+            <path d="M162 248C188 233 214 228 240 229C228 246 220 264 220 286C219 314 225 338 242 358C220 356 200 348 182 333C162 316 151 294 151 268C151 261 155 255 162 248Z" fill="#EAF2FF" fill-opacity="0.55"/>
+          </g>
+
+          <g>
+            <path d="M162 143H350C363 143 374 154 374 167V180H138V167C138 154 149 143 162 143Z" fill="#F5D27E"/>
+            <path d="M164 180H350V190C350 203 339 214 326 214H188C175 214 164 203 164 190V180Z" fill="#E5B65C"/>
+            <circle cx="256" cy="178" r="10" fill="#0A1F4D"/>
+          </g>
+
+          <g opacity="0.92">
+            <path d="M194 246C219 234 243 231 268 237" stroke="#0B1F4D" stroke-width="8" stroke-linecap="round"/>
+            <path d="M184 293C210 280 239 278 267 285" stroke="#0B1F4D" stroke-width="8" stroke-linecap="round"/>
+            <path d="M175 340C202 327 232 325 262 332" stroke="#0B1F4D" stroke-width="8" stroke-linecap="round"/>
+          </g>
+
+          <g>
+            <path d="M118 386C176 356 214 346 256 346C299 346 337 356 396 386" stroke="#F7D47E" stroke-width="10" stroke-linecap="round"/>
+            <path d="M256 346V402" stroke="#F7D47E" stroke-width="10" stroke-linecap="round"/>
+          </g>
+        </svg>
+      `;
+
+      function triggerDownload(size, filename) {
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const blob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const img = new Image();
+
+        img.onload = () => {
+          canvas.width = size;
+          canvas.height = size;
+          ctx.clearRect(0, 0, size, size);
+          ctx.drawImage(img, 0, 0, size, size);
+
+          const link = document.createElement('a');
+          link.download = filename;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+
+          document.getElementById('status').textContent = `Yuklab olindi: ${filename}`;
+          URL.revokeObjectURL(url);
+        };
+
+        img.src = url;
+      }
+
+      document.getElementById('download192').addEventListener('click', () => {
+        document.getElementById('status').textContent = '192×192 PNG yaratilmoqda...';
+        triggerDownload(192, 'pwa-192x192.png');
+      });
+
+      document.getElementById('download512').addEventListener('click', () => {
+        document.getElementById('status').textContent = '512×512 PNG yaratilmoqda...';
+        triggerDownload(512, 'pwa-512x512.png');
+      });
+    </script>
+  </body>
+</html>
