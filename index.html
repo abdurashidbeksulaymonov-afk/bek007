@@ -1,304 +1,302 @@
 ﻿<!DOCTYPE html>
 <html lang="uz">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#4f46e5" />
-    <title>XULKAROY PARDALARI</title>
-    <link rel="manifest" href="manifest.json" />
-    <link rel="icon" type="image/svg+xml" href="icon.svg" />
-    <link rel="stylesheet" href="style.css" />
-    <script src="./config.js"></script>
-    <script src="./eskizService.js"></script>
-  </head>
-  <body>
-    <div id="authModal" class="auth-modal">
-      <div class="auth-card">
-        <div class="brand-block">
-          <div class="brand-mark">XP</div>
-          <div>
-            <h2 id="storeTitleDisplay">XULKAROY PARDALARI</h2>
-            <p>Parda CRM & ERP</p>
-          </div>
-        </div>
 
-        <div class="auth-tabs">
-          <button type="button" class="tab-btn active" data-tab="login">Kirish</button>
-          <button type="button" class="tab-btn" data-tab="register">Ro'yxatdan o'tish</button>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#4f46e5" />
+  <title>XULKAROY PARDALARI</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="stylesheet" href="/style.css" />
+  <script src="/config.js"></script>
+  <script src="/eskizService.js"></script>
+</head>
 
-        <div id="loginPanel" class="auth-panel">
-          <form id="loginForm" novalidate>
-            <div class="field">
-              <label for="loginUser">Ism yoki Telefon raqam</label>
-              <input id="loginUser" name="loginUser" type="text" placeholder="Ism yoki +998901234567" required />
-            </div>
-
-            <div class="field">
-              <label for="loginPass">Parol (PIN)</label>
-              <input id="loginPass" name="loginPass" type="password" placeholder="Parolni kiriting" required />
-            </div>
-
-            <button type="submit" class="primary-btn">Tizimga Kirish</button>
-          </form>
-        </div>
-
-        <div id="registerPanel" class="auth-panel hidden">
-          <form id="registerForm" novalidate>
-            <div class="field">
-              <label for="regRole">Rolni tanlang</label>
-              <select id="regRole" name="role">
-                <option value="Admin">Boshliq / Admin</option>
-                <option value="Employee">Ishchi / Employee</option>
-              </select>
-            </div>
-
-            <div id="storeField" class="field hidden">
-              <label for="regStore">Do'kon nomi</label>
-              <input id="regStore" name="storeName" type="text" placeholder="XULKAROY PARDALARI" />
-            </div>
-
-            <div class="field">
-              <label for="regName">Ism va Familiya</label>
-              <input id="regName" name="name" type="text" placeholder="Ali Valiyev" required />
-            </div>
-
-            <div class="field">
-              <label for="regPhone">Telefon raqami</label>
-              <input id="regPhone" name="phone" type="tel" placeholder="+998901234567" required />
-            </div>
-
-            <div class="field">
-              <label for="regPass">Parol (PIN yaratish)</label>
-              <input id="regPass" name="password" type="password" placeholder="Parolni kiriting" required />
-            </div>
-
-            <div class="field">
-              <label for="regAvatar">Profil rasmi (URL)</label>
-              <input id="regAvatar" name="avatar" type="url" placeholder="https://example.com/avatar.jpg" />
-            </div>
-
-            <button type="submit" class="primary-btn">Ro'yxatdan o'tish va Kirish</button>
-          </form>
+<body>
+  <div id="authModal" class="auth-modal">
+    <div class="auth-card">
+      <div class="brand-block">
+        <div class="brand-mark">XP</div>
+        <div>
+          <h2 id="storeTitleDisplay">XULKAROY PARDALARI</h2>
+          <p>Parda CRM & ERP</p>
         </div>
       </div>
+
+      <div class="auth-tabs">
+        <button type="button" class="tab-btn active" data-tab="login">Kirish</button>
+        <button type="button" class="tab-btn" data-tab="register">Ro'yxatdan o'tish</button>
+      </div>
+
+      <div id="loginPanel" class="auth-panel">
+        <form id="loginForm" novalidate>
+          <div class="field">
+            <label for="loginUser">Ism yoki Telefon raqam</label>
+            <input id="loginUser" name="loginUser" type="text" placeholder="Ism yoki +998901234567" required />
+          </div>
+
+          <div class="field">
+            <label for="loginPass">Parol (PIN)</label>
+            <input id="loginPass" name="loginPass" type="password" placeholder="Parolni kiriting" required />
+          </div>
+
+          <button type="submit" class="primary-btn">Tizimga Kirish</button>
+        </form>
+      </div>
+
+      <div id="registerPanel" class="auth-panel hidden">
+        <form id="registerForm" novalidate>
+          <div class="field">
+            <label for="regRole">Rolni tanlang</label>
+            <select id="regRole" name="role">
+              <option value="Admin">Boshliq / Admin</option>
+              <option value="Employee">Ishchi / Employee</option>
+            </select>
+          </div>
+
+          <div id="storeField" class="field hidden">
+            <label for="regStore">Do'kon nomi</label>
+            <input id="regStore" name="storeName" type="text" placeholder="XULKAROY PARDALARI" />
+          </div>
+
+          <div class="field">
+            <label for="regName">Ism va Familiya</label>
+            <input id="regName" name="name" type="text" placeholder="Ali Valiyev" required />
+          </div>
+
+          <div class="field">
+            <label for="regPhone">Telefon raqami</label>
+            <input id="regPhone" name="phone" type="tel" placeholder="+998901234567" required />
+          </div>
+
+          <div class="field">
+            <label for="regPass">Parol (PIN yaratish)</label>
+            <input id="regPass" name="password" type="password" placeholder="Parolni kiriting" required />
+          </div>
+
+          <div class="field">
+            <label for="regAvatar">Profil rasmi (URL)</label>
+            <input id="regAvatar" name="avatar" type="url" placeholder="https://example.com/avatar.jpg" />
+          </div>
+
+          <button type="submit" class="primary-btn">Ro'yxatdan o'tish va Kirish</button>
+        </form>
+      </div>
     </div>
+  </div>
 
-    <div id="dashboard" class="dashboard hidden">
-      <header class="topbar">
-        <div class="brand-name-wrap">
-          <div class="brand-mark small">XP</div>
-          <h1 id="appStoreName">XULKAROY PARDALARI</h1>
-        </div>
+  <div id="dashboard" class="dashboard hidden">
+    <header class="topbar">
+      <div class="brand-name-wrap">
+        <div class="brand-mark small">XP</div>
+        <h1 id="appStoreName">XULKAROY PARDALARI</h1>
+      </div>
 
-        <div class="topbar-actions">
-          <span id="currentUserDisplay">Foydalanuvchi</span>
-          <button type="button" id="logoutBtn" class="secondary-btn">Chiqish</button>
-        </div>
-      </header>
+      <div class="topbar-actions">
+        <span id="currentUserDisplay">Foydalanuvchi</span>
+        <button type="button" id="logoutBtn" class="secondary-btn">Chiqish</button>
+      </div>
+    </header>
 
-      <main class="content-wrap">
-        <section class="stats-grid">
-          <article class="stat-card">
-            <span class="label">Umumiy foydalanuvchilar</span>
-            <strong id="usersCount">0</strong>
-            <small>Ro'yxatdan o'tganlar soni</small>
-          </article>
+    <main class="content-wrap">
+      <section class="stats-grid">
+        <article class="stat-card">
+          <span class="label">Umumiy foydalanuvchilar</span>
+          <strong id="usersCount">0</strong>
+          <small>Ro'yxatdan o'tganlar soni</small>
+        </article>
 
-          <article class="stat-card">
-            <span class="label">Ishchilar</span>
-            <strong id="employeesCount">0</strong>
-            <small>Sotuvchi xodimlar</small>
-          </article>
+        <article class="stat-card">
+          <span class="label">Ishchilar</span>
+          <strong id="employeesCount">0</strong>
+          <small>Sotuvchi xodimlar</small>
+        </article>
 
-          <article class="stat-card">
-            <span class="label">Mijozlar</span>
-            <strong id="customersCount">0</strong>
-            <small>Buyurtmachi mijozlar</small>
-          </article>
+        <article class="stat-card">
+          <span class="label">Mijozlar</span>
+          <strong id="customersCount">0</strong>
+          <small>Buyurtmachi mijozlar</small>
+        </article>
 
-          <article class="stat-card">
-            <span class="label">Rol</span>
-            <strong id="currentRole">—</strong>
-            <small>Hozirgi foydalanuvchi roli</small>
-          </article>
-        </section>
+        <article class="stat-card">
+          <span class="label">Rol</span>
+          <strong id="currentRole">—</strong>
+          <small>Hozirgi foydalanuvchi roli</small>
+        </article>
+      </section>
 
-        <section class="panel-card">
-          <h3>CRM boshqaruv paneli</h3>
-          <p id="welcomeMessage">Tizimga xush kelibsiz.</p>
-        </section>
+      <section class="panel-card">
+        <h3>CRM boshqaruv paneli</h3>
+        <p id="welcomeMessage">Tizimga xush kelibsiz.</p>
+      </section>
 
-        <section class="dashboard-grid">
-          <div id="saleFormCard" class="panel-card">
-            <div class="panel-header">
-              <h3>Sotuv / Kirim kiritish</h3>
-              <span id="salePanelBadge" class="panel-badge">Ishchi va Boshliq</span>
-            </div>
+      <section class="dashboard-grid">
+        <div id="saleFormCard" class="panel-card">
+          <div class="panel-header">
+            <h3>Sotuv / Kirim kiritish</h3>
+            <span id="salePanelBadge" class="panel-badge">Ishchi va Boshliq</span>
+          </div>
 
-            <form id="saleForm">
-              <div class="field-grid">
-                <div class="field">
-                  <label for="saleCustomerName">Mijoz ismi</label>
-                  <input id="saleCustomerName" name="customerName" type="text" placeholder="Mijoz ismi" required />
-                </div>
-
-                <div class="field">
-                  <label for="saleCustomerPhone">Telefon raqami</label>
-                  <input id="saleCustomerPhone" name="customerPhone" type="tel" placeholder="+998901234567" required />
-                </div>
-
-                <div class="field">
-                  <label for="fabricType">Parda mato turi</label>
-                  <input
-                    id="fabricType"
-                    name="fabricType"
-                    type="text"
-                    placeholder="Mato turini kiriting..."
-                    required
-                  />
-                </div>
-
-                <div class="field">
-                  <label for="saleMeters">Sotilayotgan metraj (m)</label>
-                  <input id="saleMeters" name="meters" type="number" min="0.1" step="0.1" placeholder="10" required />
-                </div>
-
-                <div class="field">
-                  <label for="saleUnitPrice">1 metr sotish narxi</label>
-                  <input id="saleUnitPrice" name="unitPrice" type="number" min="1" step="1" placeholder="180000" required />
-                </div>
-
-                <div id="saleCostWrap" class="field admin-only hidden">
-                  <label for="saleCostPerMeter">1 metr tannarxi</label>
-                  <input id="saleCostPerMeter" name="costPerMeter" type="number" min="0" step="1" placeholder="120000" />
-                </div>
-
-                <div class="field">
-                  <label for="saleStatus">Holat</label>
-                  <select id="saleStatus" name="status">
-                    <option value="Kutilmoqda">Kutilmoqda</option>
-                    <option value="Yuborildi">Yuborildi</option>
-                    <option value="Yetkazilgan">Yetkazilgan</option>
-                  </select>
-                </div>
+          <form id="saleForm">
+            <div class="field-grid">
+              <div class="field">
+                <label for="saleCustomerName">Mijoz ismi</label>
+                <input id="saleCustomerName" name="customerName" type="text" placeholder="Mijoz ismi" required />
               </div>
 
-              <div class="form-actions">
-                <button type="submit" class="primary-btn">Sotuvni saqlash</button>
+              <div class="field">
+                <label for="saleCustomerPhone">Telefon raqami</label>
+                <input id="saleCustomerPhone" name="customerPhone" type="tel" placeholder="+998901234567" required />
               </div>
-            </form>
-          </div>
 
-          <div id="salesTableCard" class="panel-card table-panel">
-            <div class="panel-header">
-              <h3>So'nggi kirim-chiqim va sotuvlar</h3>
-              <span id="salesTableBadge" class="panel-badge">Ro'yxat</span>
+              <div class="field">
+                <label for="fabricType">Parda mato turi</label>
+                <input id="fabricType" name="fabricType" type="text" placeholder="Mato turini kiriting..." required />
+              </div>
+
+              <div class="field">
+                <label for="saleMeters">Sotilayotgan metraj (m)</label>
+                <input id="saleMeters" name="meters" type="number" min="0.1" step="0.1" placeholder="10" required />
+              </div>
+
+              <div class="field">
+                <label for="saleUnitPrice">1 metr sotish narxi</label>
+                <input id="saleUnitPrice" name="unitPrice" type="number" min="1" step="1" placeholder="180000"
+                  required />
+              </div>
+
+              <div id="saleCostWrap" class="field admin-only hidden">
+                <label for="saleCostPerMeter">1 metr tannarxi</label>
+                <input id="saleCostPerMeter" name="costPerMeter" type="number" min="0" step="1" placeholder="120000" />
+              </div>
+
+              <div class="field">
+                <label for="saleStatus">Holat</label>
+                <select id="saleStatus" name="status">
+                  <option value="Kutilmoqda">Kutilmoqda</option>
+                  <option value="Yuborildi">Yuborildi</option>
+                  <option value="Yetkazilgan">Yetkazilgan</option>
+                </select>
+              </div>
             </div>
 
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th id="dateHeader">Sana</th>
-                    <th id="customerHeader">Mijoz</th>
-                    <th id="fabricHeader">Parda turi</th>
-                    <th id="metersHeader">Metraj (m)</th>
-                    <th id="totalHeader">Jami summa</th>
-                    <th id="profitHeader" class="admin-only hidden">Sof foyda</th>
-                    <th id="statusHeader">Status</th>
-                    <th id="employeeHeader">Mas'ul xodim</th>
-                  </tr>
-                </thead>
-                <tbody id="salesTableBody"></tbody>
-              </table>
+            <div class="form-actions">
+              <button type="submit" class="primary-btn">Sotuvni saqlash</button>
             </div>
-          </div>
-        </section>
+          </form>
+        </div>
 
-        <section id="adminFinancePanel" class="panel-card admin-only hidden">
+        <div id="salesTableCard" class="panel-card table-panel">
           <div class="panel-header">
-            <h3>Moliyaviy ko'rsatkichlar</h3>
-            <span class="panel-badge danger">Admin</span>
+            <h3>So'nggi kirim-chiqim va sotuvlar</h3>
+            <span id="salesTableBadge" class="panel-badge">Ro'yxat</span>
           </div>
 
-          <div class="finance-grid">
-            <article class="finance-card">
-              <span>Umumiy tushum</span>
-              <strong id="totalRevenue">0 so'm</strong>
-            </article>
-
-            <article class="finance-card">
-              <span>Umumiy tannarx</span>
-              <strong id="totalCost">0 so'm</strong>
-            </article>
-
-            <article class="finance-card">
-              <span>Sof foyda</span>
-              <strong id="totalProfit">0 so'm</strong>
-            </article>
-
-            <article class="finance-card warning">
-              <span>Bankrotlik xavfi</span>
-              <strong id="bankruptcyRisk">Past</strong>
-            </article>
-          </div>
-        </section>
-
-        <section id="adminSettingsPanel" class="panel-card admin-only hidden">
-          <div class="panel-header">
-            <h3>Boshliq sozlamalari</h3>
-            <span class="panel-badge danger">Admin</span>
-          </div>
-
-          <div class="settings-row">
-            <div class="setting-copy">
-              <strong>Yangi ro'yxatdan o'tganlarni admin tasdiqlashi</strong>
-              <small>Yoqilgan bo'lsa, yangi foydalanuvchilar kutilayotgan statusda qoladi.</small>
-            </div>
-
-            <label class="switch">
-              <input id="approvalToggle" type="checkbox" checked />
-              <span class="slider"></span>
-            </label>
-          </div>
-        </section>
-
-        <section id="pendingUsersPanel" class="panel-card admin-only hidden">
-          <div class="panel-header">
-            <h3>Tasdiqlanishi kutilayotgan xodimlar</h3>
-            <span class="panel-badge danger">Admin</span>
-          </div>
-
-          <div id="pendingUsersList" class="pending-users-list"></div>
-        </section>
-
-        <section id="employeePerformancePanel" class="panel-card admin-only hidden">
-          <div class="panel-header">
-            <h3>Ishchilar ko'rsatkichlari</h3>
-            <span class="panel-badge">Admin</span>
-          </div>
-
-          <div class="performance-table-wrap">
-            <table class="performance-table">
+          <div class="table-wrap">
+            <table>
               <thead>
                 <tr>
-                  <th>Ishchi</th>
-                  <th>Telefon</th>
-                  <th>Jami sotilgan</th>
-                  <th>Metraj</th>
-                  <th>Umumiy tushum</th>
+                  <th id="dateHeader">Sana</th>
+                  <th id="customerHeader">Mijoz</th>
+                  <th id="fabricHeader">Parda turi</th>
+                  <th id="metersHeader">Metraj (m)</th>
+                  <th id="totalHeader">Jami summa</th>
+                  <th id="profitHeader" class="admin-only hidden">Sof foyda</th>
+                  <th id="statusHeader">Status</th>
+                  <th id="employeeHeader">Mas'ul xodim</th>
                 </tr>
               </thead>
-              <tbody id="employeePerformanceBody"></tbody>
+              <tbody id="salesTableBody"></tbody>
             </table>
           </div>
+        </div>
+      </section>
 
-          <div id="employeePerformanceCards" class="employee-performance-cards"></div>
-        </section>
-      </main>
-    </div>
+      <section id="adminFinancePanel" class="panel-card admin-only hidden">
+        <div class="panel-header">
+          <h3>Moliyaviy ko'rsatkichlar</h3>
+          <span class="panel-badge danger">Admin</span>
+        </div>
 
-    <script src="app.js"></script>
-  </body>
+        <div class="finance-grid">
+          <article class="finance-card">
+            <span>Umumiy tushum</span>
+            <strong id="totalRevenue">0 so'm</strong>
+          </article>
+
+          <article class="finance-card">
+            <span>Umumiy tannarx</span>
+            <strong id="totalCost">0 so'm</strong>
+          </article>
+
+          <article class="finance-card">
+            <span>Sof foyda</span>
+            <strong id="totalProfit">0 so'm</strong>
+          </article>
+
+          <article class="finance-card warning">
+            <span>Bankrotlik xavfi</span>
+            <strong id="bankruptcyRisk">Past</strong>
+          </article>
+        </div>
+      </section>
+
+      <section id="adminSettingsPanel" class="panel-card admin-only hidden">
+        <div class="panel-header">
+          <h3>Boshliq sozlamalari</h3>
+          <span class="panel-badge danger">Admin</span>
+        </div>
+
+        <div class="settings-row">
+          <div class="setting-copy">
+            <strong>Yangi ro'yxatdan o'tganlarni admin tasdiqlashi</strong>
+            <small>Yoqilgan bo'lsa, yangi foydalanuvchilar kutilayotgan statusda qoladi.</small>
+          </div>
+
+          <label class="switch">
+            <input id="approvalToggle" type="checkbox" checked />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <section id="pendingUsersPanel" class="panel-card admin-only hidden">
+        <div class="panel-header">
+          <h3>Tasdiqlanishi kutilayotgan xodimlar</h3>
+          <span class="panel-badge danger">Admin</span>
+        </div>
+
+        <div id="pendingUsersList" class="pending-users-list"></div>
+      </section>
+
+      <section id="employeePerformancePanel" class="panel-card admin-only hidden">
+        <div class="panel-header">
+          <h3>Ishchilar ko'rsatkichlari</h3>
+          <span class="panel-badge">Admin</span>
+        </div>
+
+        <div class="performance-table-wrap">
+          <table class="performance-table">
+            <thead>
+              <tr>
+                <th>Ishchi</th>
+                <th>Telefon</th>
+                <th>Jami sotilgan</th>
+                <th>Metraj</th>
+                <th>Umumiy tushum</th>
+              </tr>
+            </thead>
+            <tbody id="employeePerformanceBody"></tbody>
+          </table>
+        </div>
+
+        <div id="employeePerformanceCards" class="employee-performance-cards"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
 </html>

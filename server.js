@@ -9,20 +9,23 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 1. Asosiy papkadagi HTML, JS, CSS statik fayllarni ulash
+// Statik fayllarni (CSS, JS, SVG va h.k.) birinchi bo'lib tarqatish
 app.use(express.static(__dirname));
 
-// 2. API route'lar
-app.use('/', smsRoutes);
+// API marshrutlari
+app.use('/api', smsRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-// 3. Har qanday web so'rov kelganda index.html faylini ko'rsatish
+// Faqat HTML sahifalarga mo'ljallangan catch-all route
 app.get('*', (req, res) => {
+  // Agar so'rov CSS, JS yoki rasm fayllariga kelgan bo'lsa, uni tushirib yubormaslik
+  if (req.path.includes('.')) {
+    return res.status(404).send('Not found');
+  }
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Vercel serverless muhitida ishlay olishi uchun app ni eksport qilamiz
 module.exports = app;
