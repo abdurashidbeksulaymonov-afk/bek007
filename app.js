@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'smartPardaMultiTenantERP';
-const RESET_KEY = 'smartPardaMultiTenantERP_reset_done';
+const RESET_KEY = 'smartPardaMultiTenantERP_reset_v2_done';
 const DEFAULT_STORE_NAME = 'XULKAROY PARDALARI';
 const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80';
 
@@ -37,7 +37,6 @@ const refs = {
   salesTableBody: document.getElementById('salesTableBody'),
   adminFinancePanel: document.getElementById('adminFinancePanel'),
   adminSettingsPanel: document.getElementById('adminSettingsPanel'),
-  approvalToggle: document.getElementById('approvalToggle'),
   pendingUsersPanel: document.getElementById('pendingUsersPanel'),
   pendingUsersList: document.getElementById('pendingUsersList'),
   employeePerformancePanel: document.getElementById('employeePerformancePanel'),
@@ -297,25 +296,29 @@ function renderPendingUsers() {
 
   refs.pendingUsersPanel.classList.remove('hidden');
 
-  const pendingUsers = state.users.filter((user) => user.status === 'pending');
+  const manageableUsers = state.users.filter((user) => user.id !== currentUser.id);
 
-  if (!pendingUsers.length) {
+  if (!manageableUsers.length) {
     refs.pendingUsersList.innerHTML = `
-      <div class="empty-state">Hozircha yangi so'rovlar yo'q.</div>
+      <div class="empty-state">Hozircha boshqa foydalanuvchilar yo'q.</div>
     `;
     return;
   }
 
-  refs.pendingUsersList.innerHTML = pendingUsers.map((user) => `
+  refs.pendingUsersList.innerHTML = manageableUsers.map((user) => `
     <div class="pending-user-item">
       <div class="pending-user-meta">
         <strong>${user.name}</strong>
-        <span>${user.phone}</span>
+        <span>${user.phone} · ${getRoleLabel(user.role)} · ${user.status === 'approved' ? 'Ruxsat berilgan' : 'Kutilmoqda'}</span>
       </div>
 
       <div class="pending-actions">
-        <button type="button" class="approve-btn" data-action="approve" data-user-id="${user.id}">Tasdiqlash</button>
-        <button type="button" class="reject-btn" data-action="reject" data-user-id="${user.id}">Radd etish</button>
+        <label class="access-toggle">
+          <input type="checkbox" data-action="toggle-access" data-user-id="${user.id}" ${user.status === 'approved' ? 'checked' : ''} />
+          <span class="slider"></span>
+          <span>Tizimga kirishga ruxsat berish</span>
+        </label>
+        <button type="button" class="reject-btn" data-action="reject" data-user-id="${user.id}">O'chirish</button>
       </div>
     </div>
   `).join('');
@@ -338,7 +341,7 @@ function renderEmployeePerformance() {
   if (!employees.length) {
     refs.employeePerformanceBody.innerHTML = `
       <tr>
-        <td colspan="5" class="empty-state">Hozircha ishchilar mavjud emas.</td>
+        <td colspan="6" class="empty-state">Hozircha ishchilar mavjud emas.</td>
       </tr>
     `;
     refs.employeePerformanceCards.innerHTML = '<div class="empty-state">Hozircha ishchilar mavjud emas.</div>';
@@ -381,6 +384,13 @@ function renderEmployeePerformance() {
         <td>${employee.totalSales} dona</td>
         <td>${employee.totalMeters.toFixed(1)} m</td>
         <td>${formatCurrency(employee.totalRevenue)}</td>
+        <td>
+          <label class="access-toggle">
+            <input type="checkbox" data-action="toggle-access" data-user-id="${employee.id}" ${employee.status === 'approved' ? 'checked' : ''} />
+            <span class="slider"></span>
+            <span>${employee.status === 'approved' ? 'Ruxsat berilgan' : 'Kutilmoqda'}</span>
+          </label>
+        </td>
       </tr>
     `;
   }).join('');
@@ -422,6 +432,11 @@ function renderEmployeePerformance() {
             <span>Umumiy tushum</span>
             <strong>${formatCurrency(employee.totalRevenue)}</strong>
           </div>
+          <label class="access-toggle">
+            <input type="checkbox" data-action="toggle-access" data-user-id="${employee.id}" ${employee.status === 'approved' ? 'checked' : ''} />
+            <span class="slider"></span>
+            <span>${employee.status === 'approved' ? 'Tizimga kirishga ruxsat berilgan' : 'Tizimga kirish bloklangan'}</span>
+          </label>
         </div>
       </article>
     `;
@@ -510,8 +525,6 @@ function renderDashboard() {
   refs.salePanelBadge.textContent = getRoleLabel(currentUser.role);
   refs.adminFinancePanel.classList.toggle('hidden', !isAdmin);
   refs.adminSettingsPanel.classList.toggle('hidden', !isAdmin);
-  refs.approvalToggle.checked = state.approvalRequired;
-
   renderFinanceSummary();
   renderPendingUsers();
   renderEmployeePerformance();
@@ -614,8 +627,6 @@ function handleRegister(event) {
     return;
   }
 
-  const requiresApproval = !isFirstUser && state.approvalRequired;
-
   const newUser = {
     id: `user-${Date.now()}`,
     name,
@@ -623,14 +634,14 @@ function handleRegister(event) {
     phone,
     password,
     avatar,
-    status: requiresApproval ? 'pending' : 'approved',
+    status: isFirstUser ? 'approved' : 'pending',
     ...(role === 'Admin' ? { storeName } : {}),
   };
 
   state.users.push(newUser);
   state.storeName = DEFAULT_STORE_NAME;
 
-  if (isFirstUser || !state.approvalRequired) {
+  if (isFirstUser) {
     state.activeUserId = newUser.id;
   } else {
     state.activeUserId = null;
@@ -648,12 +659,7 @@ function handleRegister(event) {
     return;
   }
 
-  if (state.approvalRequired) {
-    alert('Ro\'yxatdan o\'tish muvaffaqiyatli yakunlandi. Hisobingiz admin tomonidan tasdiqlanishi kutilmoqda.');
-    return;
-  }
-
-  alert('Ro\'yxatdan o\'tish muvaffaqiyatli yakunlandi. Siz avtomatik ravishda tizimga kirdingiz.');
+  alert('Ro\'yxatdan o\'tish muvaffaqiyatli yakunlandi. Boshliq sizga tizimga kirish ruxsatini yoqishi kutilmoqda.');
 }
 
 function handleSaleSubmit(event) {
@@ -732,16 +738,19 @@ function handlePendingUserAction(event) {
     state.users[userIndex].status = 'approved';
   }
 
+  if (action === 'toggle-access') {
+    const currentUser = getCurrentUser();
+    if (!currentUser || currentUser.role !== 'Admin' || state.users[userIndex].role !== 'Employee') {
+      return;
+    }
+
+    state.users[userIndex].status = state.users[userIndex].status === 'approved' ? 'pending' : 'approved';
+  }
+
   if (action === 'reject') {
     state.users.splice(userIndex, 1);
   }
 
-  saveState();
-  renderDashboard();
-}
-
-function handleApprovalToggle() {
-  state.approvalRequired = refs.approvalToggle.checked;
   saveState();
   renderDashboard();
 }
@@ -756,7 +765,8 @@ refs.registerForm.addEventListener('submit', handleRegister);
 refs.saleForm.addEventListener('submit', handleSaleSubmit);
 refs.logoutBtn.addEventListener('click', handleLogout);
 refs.pendingUsersList.addEventListener('click', handlePendingUserAction);
-refs.approvalToggle.addEventListener('change', handleApprovalToggle);
+refs.employeePerformanceBody.addEventListener('click', handlePendingUserAction);
+refs.employeePerformanceCards.addEventListener('click', handlePendingUserAction);
 
 function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) {

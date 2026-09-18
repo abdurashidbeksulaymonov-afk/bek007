@@ -6,11 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#4f46e5" />
   <title>XULKAROY PARDALARI</title>
-  <link rel="manifest" href="/manifest.json" />
-  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-  <link rel="stylesheet" href="/style.css" />
-  <script src="/config.js"></script>
-  <script src="/eskizService.js"></script>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+  <link rel="stylesheet" href="./style.css" />
+  <script src="./config.js"></script>
+  <script src="./eskizService.js"></script>
 </head>
 
 <body>
@@ -250,20 +250,15 @@
 
         <div class="settings-row">
           <div class="setting-copy">
-            <strong>Yangi ro'yxatdan o'tganlarni admin tasdiqlashi</strong>
-            <small>Yoqilgan bo'lsa, yangi foydalanuvchilar kutilayotgan statusda qoladi.</small>
+            <strong>Xodimlar kirishini individual boshqaring</strong>
+            <small>Har bir xodim uchun ruxsatni quyidagi ro'yxatdagi switch orqali yoqing yoki o'chiring.</small>
           </div>
-
-          <label class="switch">
-            <input id="approvalToggle" type="checkbox" checked />
-            <span class="slider"></span>
-          </label>
         </div>
       </section>
 
       <section id="pendingUsersPanel" class="panel-card admin-only hidden">
         <div class="panel-header">
-          <h3>Tasdiqlanishi kutilayotgan xodimlar</h3>
+          <h3>Foydalanuvchilar kirish huquqi</h3>
           <span class="panel-badge danger">Admin</span>
         </div>
 
@@ -285,6 +280,7 @@
                 <th>Jami sotilgan</th>
                 <th>Metraj</th>
                 <th>Umumiy tushum</th>
+                <th>Tizimga kirish</th>
               </tr>
             </thead>
             <tbody id="employeePerformanceBody"></tbody>
@@ -296,7 +292,7 @@
     </main>
   </div>
 
-  <script src="/app.js"></script>
+  <script src="./app.js"></script>
 </body>
 
 </html>
