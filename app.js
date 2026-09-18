@@ -1,5 +1,3 @@
-const STORAGE_KEY = 'smartPardaMultiTenantERP';
-const RESET_KEY = 'smartPardaMultiTenantERP_reset_v3_done';
 const DEFAULT_STORE_NAME = 'XULKAROY PARDALARI';
 const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80';
 
@@ -55,6 +53,7 @@ const refs = {
 
 let state = createDefaultState();
 let activeTab = 'login';
+let realtimeClient = null;
 
 async function apiRequest(path, options = {}) {
   const response = await fetch(`/api/auth${path}`, {
@@ -69,6 +68,26 @@ async function apiRequest(path, options = {}) {
 
 function showApiError(error) {
   alert(error.message || 'Server bilan aloqa xatosi.');
+}
+
+async function subscribeToCentralUpdates() {
+  if (!window.supabase || realtimeClient) return;
+
+  try {
+    const config = await apiRequest('/client-config');
+    if (!config.url || !config.anonKey) return;
+
+    realtimeClient = window.supabase.createClient(config.url, config.anonKey);
+    realtimeClient
+      .channel('central-user-approvals')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_profiles' }, async () => {
+        state = await apiRequest('/state');
+        renderDashboard();
+      })
+      .subscribe();
+  } catch (error) {
+    console.error('Supabase realtime ulanishi amalga oshmadi:', error);
+  }
 }
 
 function normalizePhone(phone) {
@@ -110,137 +129,6 @@ function createDefaultState() {
     employees: createDefaultEmployees(),
     sales: createDefaultSales(),
   };
-}
-
-function hasLegacySeedData(input) {
-  if (!input || typeof input !== 'object') {
-    return false;
-  }
-
-  const legacyNames = ['Sardor Tursunov', 'Nodir Fayziyev', 'Muhammad Aliyev'];
-  const users = Array.isArray(input.users) ? input.users : [];
-  const sales = Array.isArray(input.sales) ? input.sales : [];
-
-  const hasLegacyUser = users.some((user) => legacyNames.includes(String(user.name || '').trim()));
-  const hasLegacySales = sales.some((sale) => {
-    const hasLegacyCustomer = legacyNames.includes(String(sale.customerName || '').trim());
-    const hasLegacyEmployee = legacyNames.includes(String(sale.employeeName || '').trim());
-    return hasLegacyCustomer || hasLegacyEmployee;
-  });
-
-  return hasLegacyUser || hasLegacySales;
-}
-
-function resetPersistentState() {
-  if (window.sessionStorage) {
-    window.sessionStorage.clear();
-  }
-
-  window.localStorage.clear();
-
-  const emptyState = createDefaultState();
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(emptyState));
-  window.localStorage.setItem(RESET_KEY, 'done');
-
-  return emptyState;
-}
-
-function initializeAppState() {
-  const resetAlreadyDone = localStorage.getItem(RESET_KEY);
-  const saved = localStorage.getItem(STORAGE_KEY);
-
-  if (!resetAlreadyDone || !saved) {
-    return resetPersistentState();
-  }
-
-  try {
-    const parsed = JSON.parse(saved);
-
-    if (hasLegacySeedData(parsed)) {
-      return resetPersistentState();
-    }
-  } catch (error) {
-    return resetPersistentState();
-  }
-
-  return loadState();
-}
-
-function normalizeState(input) {
-  const fallback = createDefaultState();
-
-  if (!input || typeof input !== 'object') {
-    return fallback;
-  }
-
-  const users = Array.isArray(input.users) && input.users.length
-    ? input.users.map((user) => ({
-        id: user.id || `user-${Date.now()}-${Math.random()}`,
-        name: String(user.name || '').trim() || 'Unknown User',
-        role: user.role || 'Customer',
-        phone: normalizePhone(user.phone),
-        password: String(user.password || '').trim() || '123456',
-        avatar: user.avatar || DEFAULT_AVATAR,
-        status: user.status === 'pending' ? 'pending' : 'approved',
-        ...(user.storeName ? { storeName: String(user.storeName).trim() } : {}),
-      }))
-    : fallback.users;
-
-  const sales = Array.isArray(input.sales) && input.sales.length
-    ? input.sales.map((sale) => ({
-        id: sale.id || `sale-${Date.now()}-${Math.random()}`,
-        date: sale.date || new Date().toISOString().slice(0, 10),
-        customerName: String(sale.customerName || '').trim() || 'Noma' + 'lum',
-        customerPhone: normalizePhone(sale.customerPhone),
-        fabricType: String(sale.fabricType || '').trim() || 'Boshqa',
-        meters: Number(sale.meters || 0),
-        unitPrice: Number(sale.unitPrice || 0),
-        costPerMeter: Number(sale.costPerMeter || 0),
-        total: Number(sale.total || 0),
-        profit: Number(sale.profit || 0),
-        employeeId: sale.employeeId || 'emp-1',
-        employeeName: String(sale.employeeName || '').trim() || 'Unknown',
-        status: sale.status || 'Kutilmoqda',
-      }))
-    : fallback.sales;
-
-  return {
-    theme: input.theme === 'dark' ? 'dark' : 'light',
-    storeName: DEFAULT_STORE_NAME,
-    activeUserId: input.activeUserId || null,
-    approvalRequired: input.approvalRequired !== false,
-    users,
-    sales,
-  };
-}
-
-function loadState() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-
-    if (!saved) {
-      const initial = createDefaultState();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
-      return initial;
-    }
-
-    const parsed = JSON.parse(saved);
-    const normalized = normalizeState(parsed);
-
-    if (JSON.stringify(normalized) !== saved) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
-    }
-
-    return normalized;
-  } catch (error) {
-    const fallback = createDefaultState();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(fallback));
-    return fallback;
-  }
-}
-
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 function getCurrentUser() {
@@ -768,6 +656,7 @@ async function bootstrap() {
   resetForms();
   switchTab('login');
   renderDashboard();
+  subscribeToCentralUpdates();
   registerServiceWorker();
 }
 

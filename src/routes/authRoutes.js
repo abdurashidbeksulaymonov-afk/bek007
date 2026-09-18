@@ -1,16 +1,17 @@
 const express = require('express');
-const crypto = require('crypto');
 const {
-  defaultStoreName,
-  getState,
-  saveState,
-  hashPassword,
   publicUser,
-  publicState,
-  createSession,
+  getState,
+  getUserByLogin,
   getUserForSession,
+  createSession,
   deleteSession,
-} = require('../services/authStore');
+  registerUser,
+  updateAccess,
+  deleteUser,
+  createSale,
+  clientConfig,
+} = require('../services/supabaseStore');
 
 const router = express.Router();
 const sessionCookie = 'parda_session';
@@ -25,8 +26,7 @@ function setSessionCookie(response, token) {
 }
 
 function getSessionToken(request) {
-  const cookies = request.headers.cookie || '';
-  return cookies
+  return (request.headers.cookie || '')
     .split(';')
     .map((part) => part.trim().split('='))
     .find(([name]) => name === sessionCookie)?.[1];
@@ -42,10 +42,11 @@ async function requireAdmin(request, response, next) {
 }
 
 router.get('/state', async (request, response) => {
-  const state = await getState();
   const user = await getUserForSession(getSessionToken(request));
-  response.json(publicState(state, user?.id));
+  response.json(await getState(user?.id));
 });
+
+router.get('/client-config', (request, response) => response.json(clientConfig));
 
 router.post('/register', async (request, response) => {
   const { name, phone, password, role, avatar } = request.body || {};
@@ -56,50 +57,34 @@ router.post('/register', async (request, response) => {
     return response.status(400).json({ message: 'Ism, telefon va parolni kiriting.' });
   }
 
-  const state = await getState();
-  if (state.users.some((user) => user.phone === normalizedPhone)) {
-    return response.status(409).json({ message: 'Bu telefon raqami allaqachon ro\'yxatdan o\'tgan.' });
+  try {
+    const user = await registerUser({ name: cleanName, phone: normalizedPhone, password, role, avatar });
+    if (user.status !== 'approved') {
+      return response.status(201).json({ user: publicUser(user), pending: true });
+    }
+
+    const token = await createSession(user.id);
+    setSessionCookie(response, token);
+    return response.status(201).json({ user: publicUser(user), state: await getState(user.id) });
+  } catch (error) {
+    if (error.code === '23505') {
+      return response.status(409).json({ message: 'Bu telefon raqami allaqachon ro\'yxatdan o\'tgan.' });
+    }
+    throw error;
   }
-
-  const firstUser = state.users.length === 0;
-  const newUser = {
-    id: `user-${Date.now()}-${crypto.randomUUID()}`,
-    name: cleanName,
-    role: firstUser ? 'Admin' : (role === 'Employee' ? 'Employee' : 'Admin'),
-    phone: normalizedPhone,
-    passwordHash: hashPassword(password),
-    avatar: avatar || '',
-    status: firstUser ? 'approved' : 'pending',
-    ...(firstUser ? { storeName: defaultStoreName } : {}),
-  };
-
-  state.users.push(newUser);
-  await saveState(state);
-
-  if (!firstUser) {
-    return response.status(201).json({ user: publicUser(newUser), pending: true });
-  }
-
-  const token = await createSession(newUser.id);
-  setSessionCookie(response, token);
-  response.status(201).json({ user: publicUser(newUser), state: publicState(state, newUser.id) });
 });
 
 router.post('/login', async (request, response) => {
   const { login, password } = request.body || {};
   const value = String(login || '').trim().toLowerCase();
-  const state = await getState();
-  const user = state.users.find((item) =>
-    (item.phone.toLowerCase() === value || item.name.trim().toLowerCase() === value)
-    && item.passwordHash === hashPassword(password || '')
-  );
+  const user = await getUserByLogin(value, password || '');
 
   if (!user) return response.status(401).json({ message: 'Ism/telefon yoki parol noto\'g\'ri.' });
   if (user.status !== 'approved') return response.status(403).json({ message: 'Hisobingiz Boshliq tomonidan tasdiqlanishi kutilmoqda.' });
 
   const token = await createSession(user.id);
   setSessionCookie(response, token);
-  response.json({ user: publicUser(user), state: publicState(state, user.id) });
+  response.json({ user: publicUser(user), state: await getState(user.id) });
 });
 
 router.post('/logout', async (request, response) => {
@@ -109,20 +94,17 @@ router.post('/logout', async (request, response) => {
 });
 
 router.patch('/users/:id/access', requireAdmin, async (request, response) => {
-  const state = await getState();
-  const user = state.users.find((item) => item.id === request.params.id);
-  if (!user || user.id === request.currentUser.id) return response.status(404).json({ message: 'Foydalanuvchi topilmadi.' });
-
-  user.status = request.body.allowed ? 'approved' : 'pending';
-  await saveState(state);
-  response.json({ user: publicUser(user) });
+  if (request.params.id === request.currentUser.id) {
+    return response.status(400).json({ message: 'Boshliq o\'z kirishini o\'zgartira olmaydi.' });
+  }
+  response.json({ user: publicUser(await updateAccess(request.params.id, Boolean(request.body.allowed))) });
 });
 
 router.delete('/users/:id', requireAdmin, async (request, response) => {
-  const state = await getState();
-  if (request.params.id === request.currentUser.id) return response.status(400).json({ message: 'Boshliq o\'z akkauntini o\'chira olmaydi.' });
-  state.users = state.users.filter((user) => user.id !== request.params.id);
-  await saveState(state);
+  if (request.params.id === request.currentUser.id) {
+    return response.status(400).json({ message: 'Boshliq o\'z akkauntini o\'chira olmaydi.' });
+  }
+  await deleteUser(request.params.id);
   response.status(204).end();
 });
 
@@ -131,19 +113,7 @@ router.post('/sales', async (request, response) => {
   if (!currentUser || currentUser.status !== 'approved') {
     return response.status(401).json({ message: 'Avval tizimga kiring.' });
   }
-
-  const sale = request.body || {};
-  const state = await getState();
-  const normalizedSale = {
-    ...sale,
-    id: `sale-${Date.now()}-${crypto.randomUUID()}`,
-    date: new Date().toISOString().slice(0, 10),
-    employeeId: currentUser.id,
-    employeeName: currentUser.name,
-  };
-  state.sales.unshift(normalizedSale);
-  await saveState(state);
-  response.status(201).json({ sale: normalizedSale });
+  response.status(201).json({ sale: await createSale(currentUser.id, { ...request.body, employeeName: currentUser.name }) });
 });
 
 module.exports = router;

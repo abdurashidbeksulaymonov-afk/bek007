@@ -21,11 +21,13 @@ npm install
 npm start
 ```
 
+If PowerShell blocks `npm.ps1`, use `npm.cmd install` and `npm.cmd start`.
+
 ## Shared authentication data
 
-User accounts, sessions, and sales are stored on the server in `data/app_state.json` and `data/sessions.json`. They are no longer stored in each browser's local storage. All devices must open the same server URL, for example `http://SERVER_IP:3000`, to use the same accounts.
+User accounts, sessions, profiles, and sales are stored centrally in Supabase. They are no longer stored in each browser's local storage or in local JSON files. All devices must open the same server URL, for example `http://SERVER_IP:3000`, to use the same accounts.
 
-The first account registered in the JSON state becomes the approved Boshliq/Admin. Every later account is pending until the Boshliq enables its access switch. The initial JSON files are intentionally empty so the old browser-local accounts are not imported.
+Run `supabase/schema.sql` in the Supabase SQL editor, then copy `.env.example` to `.env` and fill in the Supabase URL, anon key, and service-role key. The first account becomes the approved Boshliq/Admin. Every later account is pending until the Boshliq enables its access switch. Supabase Realtime broadcasts profile status changes to connected devices.
 
 ## API examples
 
