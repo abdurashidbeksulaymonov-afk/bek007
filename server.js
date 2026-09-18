@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const smsRoutes = require('./src/routes/smsRoutes');
+const authRoutes = require('./src/routes/authRoutes');
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.static(__dirname));
 
 // API marshrutlari
 app.use('/api', smsRoutes);
+app.use('/api/auth', authRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
@@ -29,3 +31,10 @@ app.get('*', (req, res) => {
 });
 
 module.exports = app;
+
+if (require.main === module) {
+  const port = Number(process.env.PORT || 3000);
+  app.listen(port, () => {
+    console.log(`Smart Parda server ${port}-portda ishga tushdi.`);
+  });
+}

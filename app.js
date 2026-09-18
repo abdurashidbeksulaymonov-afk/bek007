@@ -53,8 +53,23 @@ const refs = {
   statusHeader: document.getElementById('statusHeader'),
 };
 
-let state = initializeAppState();
+let state = createDefaultState();
 let activeTab = 'login';
+
+async function apiRequest(path, options = {}) {
+  const response = await fetch(`/api/auth${path}`, {
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    ...options,
+  });
+  const body = response.status === 204 ? null : await response.json();
+  if (!response.ok) throw new Error(body?.message || 'Server bilan aloqa xatosi.');
+  return body;
+}
+
+function showApiError(error) {
+  alert(error.message || 'Server bilan aloqa xatosi.');
+}
 
 function normalizePhone(phone) {
   return String(phone || '').replace(/\s+/g, '').trim();
@@ -541,7 +556,7 @@ function resetForms() {
   toggleStoreField();
 }
 
-function handleLogin(event) {
+async function handleLogin(event) {
   event.preventDefault();
 
   const loginInput = String(document.getElementById('loginUser').value || '').trim();
@@ -552,28 +567,16 @@ function handleLogin(event) {
     return;
   }
 
-  const user = state.users.find((item) => {
-    const passwordMatches = item.password === password;
-    if (!passwordMatches) return false;
-
-    const phoneMatches = normalizePhone(item.phone) === normalizePhone(loginInput);
-    const nameMatches = normalizeName(item.name) === normalizeName(loginInput);
-    return phoneMatches || nameMatches;
-  });
-
-  if (!user) {
-    alert('Bunday foydalanuvchi topilmadi yoki parol noto\'g\'ri.');
-    return;
+  try {
+    const result = await apiRequest('/login', {
+      method: 'POST',
+      body: JSON.stringify({ login: loginInput, password }),
+    });
+    state = result.state;
+    renderDashboard();
+  } catch (error) {
+    showApiError(error);
   }
-
-  if (user.status === 'pending') {
-    alert('Hisobingiz admin tomonidan tasdiqlanishi kutilmoqda.');
-    return;
-  }
-
-  state.activeUserId = user.id;
-  saveState();
-  renderDashboard();
 }
 
 function buildEskizService() {
@@ -604,12 +607,10 @@ async function sendWelcomeSmsForRegisteredUser(user) {
   }
 }
 
-function handleRegister(event) {
+async function handleRegister(event) {
   event.preventDefault();
 
-  const isFirstUser = state.users.length === 0;
-  const role = isFirstUser ? 'Admin' : refs.regRole.value;
-  const storeName = DEFAULT_STORE_NAME;
+  const role = refs.regRole.value;
   const name = String(document.getElementById('regName').value || '').trim();
   const phone = normalizePhone(document.getElementById('regPhone').value || '');
   const password = String(document.getElementById('regPass').value || '').trim();
@@ -620,49 +621,26 @@ function handleRegister(event) {
     return;
   }
 
-  const existingUser = state.users.find((user) => normalizePhone(user.phone) === phone);
-
-  if (existingUser) {
-    alert('Bu telefon raqami allaqachon ro\'yxatdan o\'tgan. Iltimos, kirish qismidan davom eting.');
-    return;
+  try {
+    const result = await apiRequest('/register', {
+      method: 'POST',
+      body: JSON.stringify({ name, phone, password, role, avatar }),
+    });
+    resetForms();
+    switchTab('login');
+    if (result.state) {
+      state = result.state;
+      renderDashboard();
+      alert('Birinchi foydalanuvchi sifatida siz avtomatik Boshliq bo\'ldingiz va tizimga kirdingiz.');
+    } else {
+      alert('Ro\'yxatdan o\'tish yakunlandi. Boshliq tasdig\'ini kuting.');
+    }
+  } catch (error) {
+    showApiError(error);
   }
-
-  const newUser = {
-    id: `user-${Date.now()}`,
-    name,
-    role,
-    phone,
-    password,
-    avatar,
-    status: isFirstUser ? 'approved' : 'pending',
-    ...(role === 'Admin' ? { storeName } : {}),
-  };
-
-  state.users.push(newUser);
-  state.storeName = DEFAULT_STORE_NAME;
-
-  if (isFirstUser) {
-    state.activeUserId = newUser.id;
-  } else {
-    state.activeUserId = null;
-  }
-
-  saveState();
-  resetForms();
-  switchTab('login');
-  renderDashboard();
-
-  sendWelcomeSmsForRegisteredUser(newUser);
-
-  if (isFirstUser) {
-    alert('Birinchi foydalanuvchi sifatida siz avtomatik Admin rolini oldingiz va tizimga kirdingiz.');
-    return;
-  }
-
-  alert('Ro\'yxatdan o\'tish muvaffaqiyatli yakunlandi. Boshliq sizga tizimga kirish ruxsatini yoqishi kutilmoqda.');
 }
 
-function handleSaleSubmit(event) {
+async function handleSaleSubmit(event) {
   event.preventDefault();
 
   const currentUser = getCurrentUser();
@@ -707,20 +685,29 @@ function handleSaleSubmit(event) {
     status,
   };
 
-  state.sales.unshift(sale);
-  saveState();
-  refs.saleForm.reset();
-  refs.saleStatus.value = 'Kutilmoqda';
-  renderDashboard();
+  try {
+    await apiRequest('/sales', { method: 'POST', body: JSON.stringify(sale) });
+    const result = await apiRequest('/state');
+    state = result;
+    refs.saleForm.reset();
+    refs.saleStatus.value = 'Kutilmoqda';
+    renderDashboard();
+  } catch (error) {
+    showApiError(error);
+  }
 }
 
-function handleLogout() {
+async function handleLogout() {
+  try {
+    await apiRequest('/logout', { method: 'POST' });
+  } catch (error) {
+    showApiError(error);
+  }
   state.activeUserId = null;
-  saveState();
   renderDashboard();
 }
 
-function handlePendingUserAction(event) {
+async function handlePendingUserAction(event) {
   const button = event.target.closest('[data-action]');
 
   if (!button) {
@@ -728,31 +715,23 @@ function handlePendingUserAction(event) {
   }
 
   const { action, userId } = button.dataset;
-  const userIndex = state.users.findIndex((user) => user.id === userId);
+  const user = state.users.find((item) => item.id === userId);
+  if (!user) return;
 
-  if (userIndex === -1) {
-    return;
-  }
-
-  if (action === 'approve') {
-    state.users[userIndex].status = 'approved';
-  }
-
-  if (action === 'toggle-access') {
-    const currentUser = getCurrentUser();
-    if (!currentUser || currentUser.role !== 'Admin' || state.users[userIndex].id === currentUser.id) {
-      return;
+  try {
+    if (action === 'toggle-access' || action === 'approve') {
+      await apiRequest(`/users/${userId}/access`, {
+        method: 'PATCH',
+        body: JSON.stringify({ allowed: action === 'approve' || user.status !== 'approved' }),
+      });
+    } else if (action === 'reject') {
+      await apiRequest(`/users/${userId}`, { method: 'DELETE' });
     }
-
-    state.users[userIndex].status = state.users[userIndex].status === 'approved' ? 'pending' : 'approved';
+    state = await apiRequest('/state');
+    renderDashboard();
+  } catch (error) {
+    showApiError(error);
   }
-
-  if (action === 'reject') {
-    state.users.splice(userIndex, 1);
-  }
-
-  saveState();
-  renderDashboard();
 }
 
 refs.tabButtons.forEach((button) => {
@@ -780,7 +759,16 @@ function registerServiceWorker() {
   });
 }
 
-resetForms();
-switchTab('login');
-renderDashboard();
-registerServiceWorker();
+async function bootstrap() {
+  try {
+    state = await apiRequest('/state');
+  } catch (error) {
+    showApiError(error);
+  }
+  resetForms();
+  switchTab('login');
+  renderDashboard();
+  registerServiceWorker();
+}
+
+bootstrap();

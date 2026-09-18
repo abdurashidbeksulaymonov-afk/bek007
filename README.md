@@ -21,6 +21,12 @@ npm install
 npm start
 ```
 
+## Shared authentication data
+
+User accounts, sessions, and sales are stored on the server in `data/app_state.json` and `data/sessions.json`. They are no longer stored in each browser's local storage. All devices must open the same server URL, for example `http://SERVER_IP:3000`, to use the same accounts.
+
+The first account registered in the JSON state becomes the approved Boshliq/Admin. Every later account is pending until the Boshliq enables its access switch. The initial JSON files are intentionally empty so the old browser-local accounts are not imported.
+
 ## API examples
 
 ### Create client and trigger SMS
