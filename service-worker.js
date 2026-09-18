@@ -1,4 +1,4 @@
-const CACHE_NAME = 'parda-boshqaruv-v1';
+const CACHE_NAME = 'parda-boshqaruv-v2';
 const APP_SHELL = [
   './',
   './index.html',
