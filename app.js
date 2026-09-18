@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'smartPardaMultiTenantERP';
-const RESET_KEY = 'smartPardaMultiTenantERP_reset_v2_done';
+const RESET_KEY = 'smartPardaMultiTenantERP_reset_v3_done';
 const DEFAULT_STORE_NAME = 'XULKAROY PARDALARI';
 const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80';
 
@@ -740,7 +740,7 @@ function handlePendingUserAction(event) {
 
   if (action === 'toggle-access') {
     const currentUser = getCurrentUser();
-    if (!currentUser || currentUser.role !== 'Admin' || state.users[userIndex].role !== 'Employee') {
+    if (!currentUser || currentUser.role !== 'Admin' || state.users[userIndex].id === currentUser.id) {
       return;
     }
 
